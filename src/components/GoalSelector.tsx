@@ -12,6 +12,9 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
   selectedGoals,
   onGoalsChange
 }) => {
+  // Bug 17: Creating new object/array on every render causes infinite re-renders
+  const defaultGoals = goals.length === 0 ? [] : goals;
+  
   const handleGoalToggle = (goal: ExtractedGoal) => {
     const isSelected = selectedGoals.some(selected => 
       selected.goal === goal.goal && selected.baseline === goal.baseline
@@ -74,7 +77,7 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
         {selectedGoals.length > 0 && (
           <div className="selected-goals-preview">
             <h4>Selected Goals:</h4>
-            <ul>ßunder my
+            <ul>
               {selectedGoals.map((goal, index) => (
                 <li key={index}>
                   {goal.goal.substring(0, 50)}...
