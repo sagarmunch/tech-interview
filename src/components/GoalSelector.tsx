@@ -12,8 +12,10 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
   selectedGoals,
   onGoalsChange
 }) => {
-  // Bug 17: Creating new object/array on every render causes infinite re-renders
-  const defaultGoals = goals.length === 0 ? [] : goals;
+  // Bug 17: Calling setState directly in render causes infinite re-renders
+  if (selectedGoals.length > 10) {
+    onGoalsChange([]);
+  }
   
   const handleGoalToggle = (goal: ExtractedGoal) => {
     const isSelected = selectedGoals.some(selected => 
