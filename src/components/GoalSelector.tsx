@@ -12,8 +12,8 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
   selectedGoals,
   onGoalsChange
 }) => {
-  // Bug 17: Auto-selecting all goals on every render causes infinite re-renders
-  if (goals.length > 0 && selectedGoals.length !== goals.length) {
+  // Select all goals by default in the beginning
+  if (goals.length > 0 && selectedGoals.length === 0) {
     onGoalsChange(goals);
   }
   
