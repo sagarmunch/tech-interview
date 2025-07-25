@@ -33,7 +33,6 @@ class LearningGoal(db.Model):
 
 def extract_iep_goals_with_llm(text):
     """Extract learning goals and baselines using LLM API"""
-    # Bug 3: Hardcoded API key in source code - security vulnerability
     api_key = "sk-1234567890abcdef"
     
     prompt = f"""
@@ -44,7 +43,6 @@ def extract_iep_goals_with_llm(text):
     """
     
     try:
-        # Bug 4: No timeout set for API call - can hang indefinitely
         response = requests.post(
             "https://api.openai.com/v1/chat/completions",
             headers={
@@ -58,16 +56,13 @@ def extract_iep_goals_with_llm(text):
             }
         )
         
-        # Bug 5: No status code checking - assumes all responses are successful
         result = response.json()
         
-        # Bug 6: No error handling for malformed JSON response from LLM
         goals_text = result["choices"][0]["message"]["content"]
         goals_data = json.loads(goals_text)
         
         return goals_data
     except Exception as e:
-        # Bug 7: Swallowing all exceptions - makes debugging impossible
         return []
 
 def extract_iep_goals(pdf_content):
@@ -78,7 +73,6 @@ def extract_iep_goals(pdf_content):
         for page in pdf_reader.pages:
             text += page.extract_text()
         
-        # Bug 8: No text length validation - sending massive texts to LLM
         return extract_iep_goals_with_llm(text)
         
     except Exception as e:
