@@ -9,7 +9,6 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app)
 
-# Bug 1: Missing database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///students.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -22,7 +21,6 @@ class Student(db.Model):
     grade = db.Column(db.String(10), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Bug 2: Missing relationship definition
     goals = db.relationship('LearningGoal', backref='student', lazy=True)
 
 class LearningGoal(db.Model):
@@ -30,7 +28,6 @@ class LearningGoal(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
     goal_text = db.Column(db.Text, nullable=False)
     baseline = db.Column(db.Text, nullable=True)
-    selected = db.Column(db.Boolean, default=False)
 
 def extract_iep_goals(pdf_content):
     """Extract learning goals and baselines from IEP PDF"""
@@ -40,14 +37,12 @@ def extract_iep_goals(pdf_content):
         for page in pdf_reader.pages:
             text += page.extract_text()
         
-        # Bug 3: Overly simplistic regex that will miss many goals
         goal_pattern = r'Goal \d+:?\s*([^.]+\.)'
         baseline_pattern = r'Baseline:?\s*([^.]+\.)'
         
         goals = re.findall(goal_pattern, text, re.IGNORECASE)
         baselines = re.findall(baseline_pattern, text, re.IGNORECASE)
         
-        # Bug 4: Not handling mismatched goals and baselines properly
         extracted_goals = []
         for i, goal in enumerate(goals):
             baseline = baselines[i] if i < len(baselines) else "No baseline found"
@@ -66,7 +61,6 @@ def add_student():
         name = request.form.get('name')
         grade = request.form.get('grade')
         
-        # Bug 5: No input validation
         student = Student(name=name, grade=grade)
         db.session.add(student)
         db.session.commit()
@@ -89,7 +83,6 @@ def extract_goals():
         if file.filename == '':
             return jsonify({'success': False, 'error': 'No file selected'}), 400
         
-        # Bug 6: No file type validation
         pdf_content = file.read()
         goals = extract_iep_goals(pdf_content)
         
@@ -106,7 +99,6 @@ def add_student_goals(student_id):
         data = request.get_json()
         selected_goals = data.get('goals', [])
         
-        # Bug 7: No check if student exists
         for goal_data in selected_goals:
             goal = LearningGoal(
                 student_id=student_id,
@@ -123,7 +115,6 @@ def add_student_goals(student_id):
             'message': f'Added {len(selected_goals)} goals for student'
         })
     except Exception as e:
-        # Bug 8: Always returns 500, even for client errors
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/students/<int:student_id>', methods=['GET'])

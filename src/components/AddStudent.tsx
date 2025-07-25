@@ -24,17 +24,14 @@ const AddStudent: React.FC<AddStudentProps> = ({ onStudentAdded }) => {
     setError('');
 
     try {
-      // Bug 11: No client-side validation
       const result = await studentApi.addStudent(name, grade);
+
+      setCurrentStudentId(result.student_id);
       
-      if (result.success) {
-        setCurrentStudentId(result.student_id);
-        
-        if (iepFile) {
-          await handleExtractGoals();
-        } else {
-          setStep('complete');
-        }
+      if (iepFile) {
+        await handleExtractGoals();
+      } else {
+        setStep('complete');
       }
     } catch (err) {
       setError('Failed to add student');
@@ -50,12 +47,8 @@ const AddStudent: React.FC<AddStudentProps> = ({ onStudentAdded }) => {
     try {
       const result = await studentApi.extractGoals(iepFile);
       
-      if (result.success) {
-        setExtractedGoals(result.goals);
-        setStep('goals');
-      } else {
-        setError('Failed to extract goals from IEP');
-      }
+      setExtractedGoals(result.goals);
+      setStep('goals');
     } catch (err) {
       setError('Error processing IEP file');
     } finally {
@@ -64,16 +57,13 @@ const AddStudent: React.FC<AddStudentProps> = ({ onStudentAdded }) => {
   };
 
   const handleGoalsSubmit = async () => {
-    if (!currentStudentId) return;
     
     setIsLoading(true);
     try {
       const result = await studentApi.addStudentGoals(currentStudentId, selectedGoals);
-      
-      if (result.success) {
-        setStep('complete');
-        onStudentAdded?.(currentStudentId);
-      }
+
+      setStep('complete');
+      onStudentAdded?.(currentStudentId);
     } catch (err) {
       setError('Failed to save learning goals');
     } finally {
@@ -83,11 +73,9 @@ const AddStudent: React.FC<AddStudentProps> = ({ onStudentAdded }) => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    // Bug 12: No file size or type validation
     setIepFile(file || null);
   };
 
-  // Bug 13: Missing key prop in rendered lists
   const renderForm = () => (
     <div className="add-student-form">
       <h2>Add New Student</h2>
@@ -95,7 +83,7 @@ const AddStudent: React.FC<AddStudentProps> = ({ onStudentAdded }) => {
         <div className="form-group">
           <label htmlFor="name">Student Name:</label>
           <input
-            type="text"
+            type="email"
             id="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -126,7 +114,6 @@ const AddStudent: React.FC<AddStudentProps> = ({ onStudentAdded }) => {
           <input
             type="file"
             id="iep"
-            accept=".pdf"
             onChange={handleFileChange}
           />
         </div>

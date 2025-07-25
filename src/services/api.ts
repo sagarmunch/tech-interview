@@ -3,7 +3,6 @@ import { Student, ExtractedGoal } from '../types/Student';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
-// Bug 9: No error handling for network failures
 const api = axios.create({
   baseURL: API_BASE_URL,
 });
@@ -22,7 +21,6 @@ export const studentApi = {
     const formData = new FormData();
     formData.append('iep_file', file);
     
-    // Bug 10: No timeout configuration for large file uploads
     const response = await api.post('/extract-goals', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',

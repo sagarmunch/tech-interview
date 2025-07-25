@@ -18,7 +18,6 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
     );
 
     if (isSelected) {
-      // Bug 14: Inefficient array filtering - could cause performance issues
       const newSelected = selectedGoals.filter(selected =>
         !(selected.goal === goal.goal && selected.baseline === goal.baseline)
       );
@@ -49,7 +48,6 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
       
       <div className="goals-list">
         {goals.map((goal, index) => (
-          // Bug 15: Using array index as key instead of unique identifier
           <div key={index} className="goal-item">
             <label className="goal-checkbox">
               <input
@@ -76,9 +74,8 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
         {selectedGoals.length > 0 && (
           <div className="selected-goals-preview">
             <h4>Selected Goals:</h4>
-            <ul>
+            <ul>ßunder my
               {selectedGoals.map((goal, index) => (
-                // Bug 16: Another instance of using index as key
                 <li key={index}>
                   {goal.goal.substring(0, 50)}...
                 </li>
