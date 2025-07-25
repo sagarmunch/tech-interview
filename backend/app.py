@@ -4,6 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 import PyPDF2
 import io
 import re
+import requests
+import json
 from datetime import datetime
 
 app = Flask(__name__)
@@ -29,6 +31,45 @@ class LearningGoal(db.Model):
     goal_text = db.Column(db.Text, nullable=False)
     baseline = db.Column(db.Text, nullable=True)
 
+def extract_iep_goals_with_llm(text):
+    """Extract learning goals and baselines using LLM API"""
+    # Bug 3: Hardcoded API key in source code - security vulnerability
+    api_key = "sk-1234567890abcdef"
+    
+    prompt = f"""
+    Extract all learning goals and their baselines from this IEP document text.
+    Return the results as a JSON array where each object has 'goal' and 'baseline' fields.
+    
+    Text: {text}
+    """
+    
+    try:
+        # Bug 4: No timeout set for API call - can hang indefinitely
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "gpt-3.5-turbo",
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": 1000
+            }
+        )
+        
+        # Bug 5: No status code checking - assumes all responses are successful
+        result = response.json()
+        
+        # Bug 6: No error handling for malformed JSON response from LLM
+        goals_text = result["choices"][0]["message"]["content"]
+        goals_data = json.loads(goals_text)
+        
+        return goals_data
+    except Exception as e:
+        # Bug 7: Swallowing all exceptions - makes debugging impossible
+        return []
+
 def extract_iep_goals(pdf_content):
     """Extract learning goals and baselines from IEP PDF"""
     try:
@@ -37,21 +78,9 @@ def extract_iep_goals(pdf_content):
         for page in pdf_reader.pages:
             text += page.extract_text()
         
-        goal_pattern = r'Goal \d+:?\s*([^.]+\.)'
-        baseline_pattern = r'Baseline:?\s*([^.]+\.)'
+        # Bug 8: No text length validation - sending massive texts to LLM
+        return extract_iep_goals_with_llm(text)
         
-        goals = re.findall(goal_pattern, text, re.IGNORECASE)
-        baselines = re.findall(baseline_pattern, text, re.IGNORECASE)
-        
-        extracted_goals = []
-        for i, goal in enumerate(goals):
-            baseline = baselines[i] if i < len(baselines) else "No baseline found"
-            extracted_goals.append({
-                'goal': goal.strip(),
-                'baseline': baseline.strip()
-            })
-        
-        return extracted_goals
     except Exception as e:
         return []
 
